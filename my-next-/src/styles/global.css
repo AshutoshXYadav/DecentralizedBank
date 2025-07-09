@@ -1,26 +1,50 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --background: #181c24;
+  --foreground: #f3f4f6;
+  --glass-bg: rgba(24, 28, 36, 0.7);
+  --glass-border: rgba(255,255,255,0.08);
+  --accent: #6366f1;
+  --accent2: #a21caf;
+  --card-radius: 1.5rem;
+  --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  --font-sans: var(--font-geist-sans, 'Geist', 'Inter', Arial, sans-serif);
+  --font-mono: var(--font-geist-mono, 'Geist Mono', 'Fira Mono', monospace);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #10131a;
+    --foreground: #f3f4f6;
+    --glass-bg: rgba(16, 19, 26, 0.7);
+    --glass-border: rgba(255,255,255,0.10);
   }
 }
 
 body {
-  background: var(--background);
+  background: linear-gradient(135deg, #181c24 0%, #232946 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow);
+  border: 1.5px solid var(--glass-border);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #232946;
+}
+::-webkit-scrollbar-thumb {
+  background: #353b48;
+  border-radius: 8px;
 }
