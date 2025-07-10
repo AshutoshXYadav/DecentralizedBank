@@ -8,18 +8,12 @@ export default function HomePage() {
       <main className="glass-card w-full max-w-2xl mx-auto p-10 flex flex-col items-center">
         {/* Logo/Icon */}
         <div className="mb-6 flex flex-col items-center">
-          <div className="bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 p-2 rounded-full shadow-lg">
-            <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="28" cy="28" r="28" fill="url(#paint0_linear_1_1)" />
-              <path d="M18 28L28 18L38 28" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M28 38V18" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-              <defs>
-                <linearGradient id="paint0_linear_1_1" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#6366F1" />
-                  <stop offset="1" stopColor="#A21CAF" />
-                </linearGradient>
-              </defs>
-            </svg>
+          <div className="bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 p-1 rounded-full shadow-lg hover:scale-110 transition-transform duration-300">
+            <img 
+              src="/vaultX.png" 
+              alt="VaultX Logo" 
+              className="w-32 h-32 object-contain mix-blend-multiply"
+            />
           </div>
           <h1 className="text-4xl font-extrabold text-white drop-shadow mt-4 tracking-tight text-center">
             VaultX
