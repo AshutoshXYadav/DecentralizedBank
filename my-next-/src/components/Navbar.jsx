@@ -14,7 +14,7 @@ export default function Navbar() {
         <span className="text-2xl font-extrabold tracking-tight text-accent">VaultX</span>
       </div>
       <Link href="/" className="hover:text-accent font-semibold transition-colors">Home</Link>
-      <Link href="/dashboard" className="hover:text-accent font-semibold transition-colors">Banking</Link>
+      <Link href="/banking" className="hover:text-accent font-semibold transition-colors">Banking</Link>
       <Link href="/lending" className="hover:text-accent font-semibold transition-colors">Bitcoin Lending</Link>
       <Link href="/history" className="hover:text-accent font-semibold transition-colors">Transaction History</Link>
       <Link href="/scheduled" className="hover:text-accent font-semibold transition-colors">Scheduled Payments</Link>
