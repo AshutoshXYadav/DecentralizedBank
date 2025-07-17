@@ -44,17 +44,15 @@ export default function HomePage() {
           <div className="glass-card flex flex-col items-center p-6 text-center border border-white/10">
             <span className="text-3xl mb-2">🔒</span>
             <h3 className="text-lg font-bold text-white mb-1">Secure Blockchain Banking</h3>
-            <p className="text-sm text-gray-300">Your assets are protected by decentralized smart contracts and cryptography.</p>
+            
           </div>
           <div className="glass-card flex flex-col items-center p-6 text-center border border-white/10">
             <span className="text-3xl mb-2">⚡</span>
             <h3 className="text-lg font-bold text-white mb-1">Instant Crypto Transfers</h3>
-            <p className="text-sm text-gray-300">Send and receive funds globally in seconds, with full transparency and no middlemen.</p>
           </div>
           <div className="glass-card flex flex-col items-center p-6 text-center border border-white/10">
             <span className="text-3xl mb-2">💸</span>
             <h3 className="text-lg font-bold text-white mb-1">Decentralized Savings</h3>
-            <p className="text-sm text-gray-300">Grow your wealth with non-custodial, interest-earning savings powered by DeFi.</p>
           </div>
         </div>
       </main>

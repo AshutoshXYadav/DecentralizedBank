@@ -1,31 +1,61 @@
 'use client';
 
+import { useState } from 'react';
+import CreateScheduledPayment from '../../components/CreateScheduledPayment';
+import ScheduledPaymentsList from '../../components/ScheduledPaymentsList';
+import ExecuteReadyPayments from '../../components/ExecuteReadyPayments';
+import AutomationStatus from '../../components/AutomationStatus';
+import TestAutomation from '../../components/TestAutomation';
+
+const sections = [
+  { id: 'create', label: 'Create Payment', icon: '➕', component: CreateScheduledPayment },
+  { id: 'manage', label: 'Manage Payments', icon: '📋', component: ScheduledPaymentsList },
+  { id: 'execute', label: 'Execute Ready', icon: '⚡', component: ExecuteReadyPayments },
+  { id: 'automation', label: 'Automation Status', icon: '🤖', component: AutomationStatus },
+  { id: 'test', label: 'Test Automation', icon: '🧪', component: TestAutomation },
+];
+
 export default function ScheduledPage() {
+  const [active, setActive] = useState('create');
+  const userAddress = ""; // Set this to the connected wallet address if needed
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handlePaymentCreated = () => setRefreshKey(prev => prev + 1);
+  const handlePaymentUpdated = () => setRefreshKey(prev => prev + 1);
+
+  const ActiveComponent = sections.find(sec => sec.id === active)?.component;
+
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <main className="glass-card w-full max-w-xl mx-auto p-10 flex flex-col items-center animate-fade-in">
-        <div className="flex flex-col items-center mb-8">
-          <div className="bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 p-2 rounded-full shadow-lg animate-pulse mb-2">
-            {/* Animated calendar icon */}
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="20" cy="20" r="20" fill="url(#calendar-gradient)" />
-              <rect x="10" y="14" width="20" height="14" rx="3" fill="#fff" fillOpacity="0.15" stroke="#fff" strokeWidth="2"/>
-              <rect x="14" y="18" width="4" height="4" rx="1" fill="#fff" fillOpacity="0.5"/>
-              <rect x="22" y="18" width="4" height="4" rx="1" fill="#fff" fillOpacity="0.5"/>
-              <defs>
-                <linearGradient id="calendar-gradient" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#6366F1" />
-                  <stop offset="1" stopColor="#A21CAF" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-          <h1 className="text-3xl font-extrabold text-white drop-shadow tracking-tight text-center">Scheduled Payments</h1>
-          <p className="text-purple-200 mt-2 text-center max-w-xs">Automate your recurring payments and never miss a due date.</p>
-        </div>
-        <div className="flex flex-col items-center mt-8">
-          <div className="w-24 h-24 rounded-full border-4 border-accent animate-spin mb-4"></div>
-          <p className="text-gray-400 text-center">Scheduled payments feature coming soon!</p>
+    <div className="flex min-h-screen bg-[#181c27]">
+      {/* Sidebar */}
+      <nav className="w-64 bg-[#23263a] p-6 flex flex-col gap-4 shadow-lg">
+        <h2 className="text-2xl font-bold text-blue-300 mb-8">VaultX</h2>
+        {sections.map(sec => (
+          <button
+            key={sec.id}
+            onClick={() => setActive(sec.id)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-lg font-semibold transition ${
+              active === sec.id
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow'
+                : 'text-gray-300 hover:bg-[#1a1d2b]'
+            }`}
+          >
+            <span>{sec.icon}</span> {sec.label}
+          </button>
+        ))}
+      </nav>
+      {/* Main Content */}
+      <main className="flex-1 p-8 flex flex-col items-center justify-center">
+        <div className="bg-black/40 p-6 rounded-xl shadow border border-white/10 mb-8 max-w-4xl mx-auto min-h-[450px] flex flex-col justify-center w-full">
+          {ActiveComponent && (
+            <ActiveComponent
+              key={refreshKey}
+              userAddress={userAddress}
+              onPaymentCreated={handlePaymentCreated}
+              onPaymentUpdated={handlePaymentUpdated}
+              onPaymentsExecuted={handlePaymentUpdated}
+            />
+          )}
         </div>
       </main>
     </div>

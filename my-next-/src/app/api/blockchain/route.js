@@ -2,14 +2,14 @@ import { ethers, formatEther, parseEther } from "ethers";
 import contractABI from "../../../../artifacts/contracts/Bank.sol/DecentralizedBank.json";
 
 // Replace with your deployed contract address
-const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const CONTRACT_ADDRESS = "0x118745182A6a240905c936f778cda112321753C1"; // Update this after deployment
 
 // Create provider (Hardhat local node or testnet)
 //const provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/c5c88b5735e4432e8a32e553644a3aa3");
-const newProvider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/...");
+const newProvider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/2d80630540c9409c9f4c2e6849b54e83");
 // Replace with private key of deployer / backend wallet
 const PRIVATE_KEY = "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e";
-const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+const wallet = new ethers.Wallet(PRIVATE_KEY, newProvider);
 
 // Create contract instance
 const contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI.abi, wallet);
@@ -58,6 +58,150 @@ export async function POST(req) {
         }
         const history = await contract.connect(wallet).getHistory(address);
         return Response.json({ history });
+      }
+
+      // Scheduled Payment Operations
+      case "createScheduledPayment": {
+        const { recipient, amount, frequency, totalPayments, description } = body;
+        if (!recipient || !amount || !frequency) {
+          return Response.json({ message: "Recipient, amount, and frequency are required" }, { status: 400 });
+        }
+        const tx = await contract.connect(wallet).createScheduledPayment(
+          recipient,
+          parseEther(amount),
+          frequency,
+          totalPayments || 0,
+          description || ""
+        );
+        await tx.wait();
+        return Response.json({ message: `Scheduled payment created for ${amount} ETH` });
+      }
+
+      case "executeScheduledPayment": {
+        const { paymentId } = body;
+        if (!paymentId) {
+          return Response.json({ message: "Payment ID is required" }, { status: 400 });
+        }
+        const tx = await contract.connect(wallet).executeScheduledPayment(paymentId);
+        await tx.wait();
+        return Response.json({ message: `Scheduled payment ${paymentId} executed` });
+      }
+
+      case "cancelScheduledPayment": {
+        const { paymentId } = body;
+        if (!paymentId) {
+          return Response.json({ message: "Payment ID is required" }, { status: 400 });
+        }
+        const tx = await contract.connect(wallet).cancelScheduledPayment(paymentId);
+        await tx.wait();
+        return Response.json({ message: `Scheduled payment ${paymentId} cancelled` });
+      }
+
+      case "updateScheduledPayment": {
+        const { paymentId, newAmount, newFrequency } = body;
+        if (!paymentId || !newAmount || !newFrequency) {
+          return Response.json({ message: "Payment ID, new amount, and new frequency are required" }, { status: 400 });
+        }
+        const tx = await contract.connect(wallet).updateScheduledPayment(
+          paymentId,
+          parseEther(newAmount),
+          newFrequency
+        );
+        await tx.wait();
+        return Response.json({ message: `Scheduled payment ${paymentId} updated` });
+      }
+
+      case "getUserScheduledPayments": {
+        if (!address) {
+          return Response.json({ message: "Address is required" }, { status: 400 });
+        }
+        const paymentIds = await contract.connect(wallet).getUserScheduledPayments(address);
+        const payments = [];
+        for (const id of paymentIds) {
+          const payment = await contract.connect(wallet).getScheduledPayment(id);
+          payments.push({
+            id: payment.id.toString(),
+            sender: payment.sender,
+            recipient: payment.recipient,
+            amount: formatEther(payment.amount),
+            frequency: payment.frequency.toString(),
+            nextPaymentTime: new Date(Number(payment.nextPaymentTime) * 1000).toISOString(),
+            totalPayments: payment.totalPayments.toString(),
+            paymentsMade: payment.paymentsMade.toString(),
+            isActive: payment.isActive,
+            description: payment.description
+          });
+        }
+        return Response.json({ payments });
+      }
+
+      case "getReadyScheduledPayments": {
+        const readyPaymentIds = await contract.connect(wallet).getReadyScheduledPayments();
+        const readyPayments = [];
+        for (const id of readyPaymentIds) {
+          const payment = await contract.connect(wallet).getScheduledPayment(id);
+          readyPayments.push({
+            id: payment.id.toString(),
+            sender: payment.sender,
+            recipient: payment.recipient,
+            amount: formatEther(payment.amount),
+            frequency: payment.frequency.toString(),
+            nextPaymentTime: new Date(Number(payment.nextPaymentTime) * 1000).toISOString(),
+            totalPayments: payment.totalPayments.toString(),
+            paymentsMade: payment.paymentsMade.toString(),
+            isActive: payment.isActive,
+            description: payment.description
+          });
+        }
+        return Response.json({ readyPayments });
+      }
+
+      case "getScheduledPayment": {
+        const { paymentId } = body;
+        if (!paymentId) {
+          return Response.json({ message: "Payment ID is required" }, { status: 400 });
+        }
+        const payment = await contract.connect(wallet).getScheduledPayment(paymentId);
+        return Response.json({
+          payment: {
+            id: payment.id.toString(),
+            sender: payment.sender,
+            recipient: payment.recipient,
+            amount: formatEther(payment.amount),
+            frequency: payment.frequency.toString(),
+            nextPaymentTime: new Date(Number(payment.nextPaymentTime) * 1000).toISOString(),
+            totalPayments: payment.totalPayments.toString(),
+            paymentsMade: payment.paymentsMade.toString(),
+            isActive: payment.isActive,
+            description: payment.description
+          }
+        });
+      }
+
+      case "testAutomation": {
+        // Simulate Chainlink Keepers automation
+        const readyPaymentIds = await contract.connect(wallet).getReadyScheduledPayments();
+        let executedCount = 0;
+        
+        for (const paymentId of readyPaymentIds) {
+          try {
+            const tx = await contract.connect(wallet).executeScheduledPayment(paymentId);
+            await tx.wait();
+            executedCount++;
+          } catch (error) {
+            console.error(`Failed to execute payment ${paymentId}:`, error.message);
+          }
+        }
+        
+        if (executedCount > 0) {
+          return Response.json({ 
+            message: `✅ Automation test successful! Executed ${executedCount} payments automatically.` 
+          });
+        } else {
+          return Response.json({ 
+            message: "ℹ️ No payments ready for execution at this time." 
+          });
+        }
       }
 
       default:

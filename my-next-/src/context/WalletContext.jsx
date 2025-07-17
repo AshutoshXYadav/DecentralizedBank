@@ -12,6 +12,7 @@ export function WalletProvider({ children }) {
   const [connecting, setConnecting] = useState(false);
 
   async function connectWallet() {
+    if (connecting) return; // Prevent multiple calls
     if (typeof window.ethereum !== 'undefined') {
       try {
         setConnecting(true);
@@ -25,8 +26,12 @@ export function WalletProvider({ children }) {
         const bankContract = getBankContract(signer);
         setContract(bankContract);
       } catch (err) {
-        alert('Failed to connect wallet: ' + (err.message || err));
-        console.error(err);
+        if (err?.code === -32002) {
+          alert("A wallet connection request is already pending. Please check your wallet extension.");
+        } else {
+          alert('Failed to connect wallet: ' + (err?.message || JSON.stringify(err)));
+        }
+        console.error("Wallet connection error:", err, err?.message, err?.stack);
       }
       setConnecting(false);
     } else {
