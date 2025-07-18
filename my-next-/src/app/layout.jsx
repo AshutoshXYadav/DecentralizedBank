@@ -16,7 +16,9 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <ClientLayout>
-          {children}
+          <div className="container mx-auto px-2 sm:px-4 md:px-8 max-w-screen-lg">
+            {children}
+          </div>
         </ClientLayout>
       </body>
     </html>

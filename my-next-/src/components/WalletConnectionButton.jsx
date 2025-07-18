@@ -1,21 +1,22 @@
-'use client';
-import { useWallet } from '../context/WalletContext';
-import {useState} from 'react';
+import '../styles/global.css';
+import { Geist, Geist_Mono } from 'next/font/google';
+import ClientLayout from '../components/ClientLayout';
+import Navbar from '../components/Navbar';
 
-export default function WalletConnectionButton() {
-  const { account, connectWallet } = useWallet();
+const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' });
+const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' });
 
+export default function RootLayout({ children }) {
   return (
-    <div>
-      {account ? (
-        <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm">
-          Connected: {account.slice(0, 6)}...{account.slice(-4)}
-        </button>
-      ) : (
-        <button onClick={connectWallet} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm">
-          Connect Wallet
-        </button>
-      )}
-    </div>
+    <html lang="en">
+      <head>
+        <title>VaultX</title>
+      </head>
+      <body>
+        <ClientLayout>
+          {children}
+        </ClientLayout>
+      </body>
+    </html>
   );
 }
