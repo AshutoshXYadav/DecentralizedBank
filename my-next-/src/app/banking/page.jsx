@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useWallet } from '@/context/WalletContext';
 import { formatEther, parseEther } from 'ethers';
+import { ethers } from 'ethers';
 
 export default function BankingPage() {
   const { contract, account } = useWallet();
@@ -9,6 +10,10 @@ export default function BankingPage() {
   const [loading, setLoading] = useState(false);
   const [txStatus, setTxStatus] = useState("");
   const [balance, setBalance] = useState("");
+  const [transferTo, setTransferTo] = useState("");
+  const [transferAmount, setTransferAmount] = useState("");
+  const [transferStatus, setTransferStatus] = useState("");
+  const { signer } = useWallet();
 
   useEffect(() => {
     if (contract && account) checkBalance();
@@ -64,6 +69,32 @@ export default function BankingPage() {
       console.error(error);
     }
     setLoading(false);
+  }
+
+  async function handleDirectTransfer(e) {
+    e.preventDefault();
+    setTransferStatus("");
+    try {
+      if (!ethers.isAddress(transferTo)) {
+        setTransferStatus('❌ Invalid address');
+        return;
+      }
+      if (!signer) {
+        setTransferStatus('❌ Wallet not connected');
+        return;
+      }
+      const tx = await signer.sendTransaction({
+        to: transferTo,
+        value: ethers.parseEther(transferAmount)
+      });
+      setTransferStatus('⏳ Transaction sent! Waiting for confirmation...');
+      await tx.wait();
+      setTransferStatus('✅ Transfer successful!');
+      setTransferTo("");
+      setTransferAmount("");
+    } catch (err) {
+      setTransferStatus('❌ Error: ' + (err.reason || err.message));
+    }
   }
 
   return (
@@ -137,6 +168,40 @@ export default function BankingPage() {
             >
               Withdraw
             </button>
+          </div>
+        </section>
+        {/* Direct Transfer Section */}
+        <section className="w-full mt-8">
+          <div className="glass-card p-6 flex flex-col items-center border border-white/10">
+            <h2 className="text-lg font-bold text-white mb-2">Direct Transfer to Wallet</h2>
+            <form onSubmit={handleDirectTransfer} className="w-full flex flex-col gap-3">
+              <input
+                type="text"
+                placeholder="Recipient Wallet Address"
+                value={transferTo}
+                onChange={e => setTransferTo(e.target.value)}
+                className="w-full p-2 rounded bg-black/30 text-white border border-white/10 focus:outline-none focus:ring-2 focus:ring-accent"
+                required
+              />
+              <input
+                type="number"
+                placeholder="Amount in ETH"
+                value={transferAmount}
+                onChange={e => setTransferAmount(e.target.value)}
+                className="w-full p-2 rounded bg-black/30 text-white border border-white/10 focus:outline-none focus:ring-2 focus:ring-accent"
+                min="0"
+                step="any"
+                required
+              />
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-purple-600 hover:to-blue-500 text-white font-semibold px-4 py-2 rounded-xl shadow-lg transition-all duration-200"
+                disabled={!account}
+              >
+                Send
+              </button>
+            </form>
+            {transferStatus && <div className="mt-2 text-sm text-purple-300 text-center">{transferStatus}</div>}
           </div>
         </section>
       </main>

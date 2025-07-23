@@ -9,6 +9,7 @@ export function WalletProvider({ children }) {
   const [account, setAccount] = useState('');
   const [contract, setContract] = useState(null);
   const [provider, setProvider] = useState(null);
+  const [signer, setSigner] = useState(null);
   const [connecting, setConnecting] = useState(false);
 
   async function connectWallet() {
@@ -23,6 +24,7 @@ export function WalletProvider({ children }) {
         setProvider(browserProvider);
 
         const signer = await browserProvider.getSigner();
+        setSigner(signer);
         const bankContract = getBankContract(signer);
         setContract(bankContract);
       } catch (err) {
@@ -45,6 +47,7 @@ export function WalletProvider({ children }) {
         setAccount(accounts[0]);
         const browserProvider = new ethers.BrowserProvider(window.ethereum);
         const newSigner = await browserProvider.getSigner();
+        setSigner(newSigner);
         setContract(getBankContract(newSigner));
       };
       window.ethereum.on('accountsChanged', handleAccountsChanged);
@@ -54,8 +57,19 @@ export function WalletProvider({ children }) {
     }
   }, []);
 
+  // Update signer whenever provider or account changes
+  useEffect(() => {
+    async function updateSigner() {
+      if (provider && account) {
+        const newSigner = await provider.getSigner();
+        setSigner(newSigner);
+      }
+    }
+    updateSigner();
+  }, [provider, account]);
+
   return (
-    <WalletContext.Provider value={{ account, connectWallet, contract, provider, connecting }}>
+    <WalletContext.Provider value={{ account, connectWallet, contract, provider, signer, connecting }}>
       {children}
     </WalletContext.Provider>
   );
