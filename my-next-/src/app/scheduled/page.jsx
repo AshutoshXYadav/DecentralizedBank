@@ -6,6 +6,7 @@ import ScheduledPaymentsList from '../../components/ScheduledPaymentsList';
 import ExecuteReadyPayments from '../../components/ExecuteReadyPayments';
 import AutomationStatus from '../../components/AutomationStatus';
 import TestAutomation from '../../components/TestAutomation';
+import { useWallet } from '../../context/WalletContext'; // adjust path if needed
 
 const sections = [
   { id: 'create', label: 'Create Payment', icon: '➕', component: CreateScheduledPayment },
@@ -16,8 +17,8 @@ const sections = [
 ];
 
 export default function ScheduledPage() {
+  const { account: userAddress } = useWallet(); // Get the connected wallet address
   const [active, setActive] = useState('create');
-  const userAddress = ""; // Set this to the connected wallet address if needed
   const [refreshKey, setRefreshKey] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

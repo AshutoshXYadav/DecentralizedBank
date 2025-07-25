@@ -31,6 +31,7 @@ export default function CreateScheduledPayment({ onPaymentCreated }) {
     }
 
     try {
+      console.log("Sending scheduled payment request:", formData);
       const response = await fetch('/api/blockchain', {
         method: 'POST',
         headers: {
@@ -43,7 +44,9 @@ export default function CreateScheduledPayment({ onPaymentCreated }) {
         }),
       });
 
+      console.log("Received response:", response);
       const result = await response.json();
+      console.log("Parsed result:", result);
 
       if (response.ok) {
         setMessage(`✅ ${result.message}`);
@@ -62,6 +65,7 @@ export default function CreateScheduledPayment({ onPaymentCreated }) {
       }
     } catch (error) {
       setMessage(`❌ Error: ${error.message}`);
+      console.error("Error in handleSubmit:", error);
     } finally {
       setLoading(false);
     }

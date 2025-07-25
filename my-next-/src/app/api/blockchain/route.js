@@ -2,13 +2,11 @@ import { ethers, formatEther, parseEther } from "ethers";
 import contractABI from "../../../../artifacts/contracts/Bank.sol/DecentralizedBank.json";
 
 // Replace with your deployed contract address
-const CONTRACT_ADDRESS = "0x118745182A6a240905c936f778cda112321753C1"; // Update this after deployment
-
+const CONTRACT_ADDRESS = "0x118745182A6a240905c936f778cda112321753C1"; 
 // Create provider (Hardhat local node or testnet)
-//const provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/c5c88b5735e4432e8a32e553644a3aa3");
 const newProvider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/2d80630540c9409c9f4c2e6849b54e83");
 // Replace with private key of deployer / backend wallet
-const PRIVATE_KEY = "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e";
+const PRIVATE_KEY = "6ab4762edf05061c08dcc63638f223f8e58258130369674813ef2f64a568267d";
 const wallet = new ethers.Wallet(PRIVATE_KEY, newProvider);
 
 // Create contract instance
@@ -17,6 +15,7 @@ const contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI.abi, wallet);
 export async function POST(req) {
   try {
     const body = await req.json();
+    console.log("API /api/blockchain POST called with body:", body);
     const { action, address, amount, recipient } = body;
 
     switch (action) {
@@ -179,28 +178,34 @@ export async function POST(req) {
       }
 
       case "testAutomation": {
-        // Simulate Chainlink Keepers automation
-        const readyPaymentIds = await contract.connect(wallet).getReadyScheduledPayments();
-        let executedCount = 0;
-        
-        for (const paymentId of readyPaymentIds) {
-          try {
-            const tx = await contract.connect(wallet).executeScheduledPayment(paymentId);
-            await tx.wait();
-            executedCount++;
-          } catch (error) {
-            console.error(`Failed to execute payment ${paymentId}:`, error.message);
+        try {
+          // Simulate Chainlink Keepers automation
+          const readyPaymentIds = await contract.connect(wallet).getReadyScheduledPayments();
+          if (!readyPaymentIds || readyPaymentIds.length === 0) {
+            return Response.json({ message: "ℹ️ No payments ready for execution at this time." });
           }
-        }
-        
-        if (executedCount > 0) {
-          return Response.json({ 
-            message: `✅ Automation test successful! Executed ${executedCount} payments automatically.` 
-          });
-        } else {
-          return Response.json({ 
-            message: "ℹ️ No payments ready for execution at this time." 
-          });
+          let executedCount = 0;
+          for (const paymentId of readyPaymentIds) {
+            try {
+              const tx = await contract.connect(wallet).executeScheduledPayment(paymentId);
+              await tx.wait();
+              executedCount++;
+            } catch (error) {
+              console.error(`Failed to execute payment ${paymentId}:`, error);
+            }
+          }
+          if (executedCount > 0) {
+            return Response.json({
+              message: `✅ Automation test successful! Executed ${executedCount} payments automatically.`
+            });
+          } else {
+            return Response.json({
+              message: "ℹ️ No payments were executed. They may have already been processed or failed."
+            });
+          }
+        } catch (error) {
+          console.error("testAutomation API error:", error);
+          return Response.json({ message: "Server error in testAutomation", error: error.message }, { status: 500 });
         }
       }
 
