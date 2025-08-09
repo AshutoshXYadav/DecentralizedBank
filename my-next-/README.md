@@ -32,7 +32,7 @@ VaultX is a modern, full-stack decentralized banking platform that lets users:
 ### Installation
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/vaultx.git
+   git clone https: https://github.com/AshutoshXYadav/DecentralizedBank.git
    cd vaultx/my-next-
    ```
 2. **Install dependencies:**
